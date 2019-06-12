@@ -1,0 +1,8 @@
+Primeiramente, bom dia.
+Segundamente, rombo é pica.
+
+Agora vamos aos todos.
+
+[] O bot deverá ser capaz de rolar dados (+roll)
+[] O bot deverá ser capaz de retornar uma fala aleatória de um campeão (+zed, +thresh)
+[] Devemos implementar a possibilidade de enfileirar musicas com o +play
