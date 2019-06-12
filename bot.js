@@ -38,6 +38,10 @@ console.log("\ncommand: " + command);
         case 'zap':
             msg.reply('Pera, to mandando um zap');
         break
+
+        case 'minas':
+            msg.reply('Gabirujo just rolled in his grave, anger is bringing him back from the dead.');
+        break;
         
         case 'play':
             var voiceChannel = msg.member.voiceChannel;
