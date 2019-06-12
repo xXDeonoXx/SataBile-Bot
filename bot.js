@@ -50,6 +50,10 @@ console.log("\ncommand: " + command);
         case 'minas':
             msg.reply('Gabirujo just rolled in his grave, anger is bringing him back from the dead.');
         break;
+
+        case 'golira':
+            msg.reply('Bile is being summoned.');
+        break;
         
         case 'play':
             var voiceChannel = msg.member.voiceChannel;
