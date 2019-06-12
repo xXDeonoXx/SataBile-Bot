@@ -39,6 +39,14 @@ console.log("\ncommand: " + command);
             msg.reply('Pera, to mandando um zap');
         break
 
+        case 'roll':
+            msg.reply('Vai jogar rpg no inferno, o bot ainda não ta pronto.');
+        break
+
+        case 'rombo':
+            msg.reply('You have been blessed by the god Rombotron. May honey drip from your holy johnson, and may succubus be attracted to you.');
+        break
+
         case 'minas':
             msg.reply('Gabirujo just rolled in his grave, anger is bringing him back from the dead.');
         break;
