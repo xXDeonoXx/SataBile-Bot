@@ -38,26 +38,15 @@ console.log("args: " + args);
 console.log("\ncommand: " + command);
 
     switch(command){
+        
+        //retorna uma citação maravilhosa de nosso deus bile aleatóriamente
         case 'bile':
             msg.reply(bileDictionary.getFraseAleatoria());
         break
 
+        //rola dados
         case 'roll':            
-            //valores das rolagens
-            var values = roll.roll(args);
-
-            //soma total das rolagens
-            var sum = 0;
-            for(var i = 0; i < values.length; i++){
-                sum += values[i];
-            }
-
-            //montando String para mensagem com as rolagens
-            var s = "";
-            for(var i = 0; i < values.length; i++){
-                s += values[i] + ", ";
-            }
-            msg.channel.send(msg.author + " rolou: " + s + " = " + sum);
+            msg.channel.send(msg.author + " rolou: " + roll.roll(args));
         break
 
         case 'zap':
