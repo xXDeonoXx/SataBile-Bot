@@ -18,22 +18,26 @@ module.exports.roll = function(args) {
             results.push(Math.floor(Math.random() * dice + 1));
         }
 
-            //soma total das rolagens
-            var sum = 0;
-            for(var i = 0; i < results.length; i++){
-                sum += results[i];
-            }
+        //soma total das rolagens
+        var sum = 0;
+        for(var i = 0; i < results.length; i++){
+            sum += results[i];
+        }
         
-            //montando String para mensagem com as rolagens
-            var s = "";
-            for(var i = 0; i < results.length; i++){
-                s += results[i] + ", ";
-            }
-            s += "= " + sum;
+        //montando String para mensagem com as rolagens
+        var s = "";
+        for(var i = 0; i < results.length; i++){
+            s += results[i] + ", ";
+        }
+        s += "= " + sum;
+
+        if(isNaN(qtd) || isNaN(sum)){
+            return "Rolagem de dados incorreta";
+        }
 
         return s;        
-    } catch (error) {
-        console.log("formato de roll incorreto: " + error);
+    } catch (error) {        
+        console.log("Erro:  " + error);
     }
 
 }
