@@ -37,22 +37,27 @@ console.log("\ncommand: " + command);
             msg.reply(bileDictionary.getFraseAleatoria());
         break
 
-        case 'roll':
-            console.log(roll.roll(args));
+        case 'roll':            
+            var values = roll.roll(args);
+            console.log(values);
             var sum = 0;
-            for(var i = 0; i < args.length; i++){
-                sum += args[i];
+            for(var i = 0; i < values.length; i++){
+                sum += values[i];
+                console.log("i = " + i + "\n sum = " + sum);
+                console.log(args.length);
             }
-            msg.reply(roll.roll(args) + "= " + sum);
+            console.log(sum);
+
+            var s = "";
+            for(var i = 0; i < values.length; i++){
+                s += values[i] + ", ";
+            }
+            msg.channel.send(msg.author + " rolou: " + s + " = " + sum);
         break
 
         case 'zap':
             msg.reply('Pera, to mandando um zap');
         break
-
-        // case 'roll':
-        //     msg.reply('Vai jogar rpg no inferno, o bot ainda não ta pronto.');
-        // break
 
         case 'rombo':
             msg.reply('You have been blessed by the god Rombotron. May honey drip from your holy johnson, and may succubus be attracted to you.');
