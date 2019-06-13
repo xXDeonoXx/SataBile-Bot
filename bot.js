@@ -39,7 +39,11 @@ console.log("\ncommand: " + command);
 
         case 'roll':
             console.log(roll.roll(args));
-            msg.reply(roll.roll(args));
+            var sum = 0;
+            for(var i = 0; i < args.length; i++){
+                sum += args[i];
+            }
+            msg.reply(roll.roll(args) + "= " + sum);
         break
 
         case 'zap':
