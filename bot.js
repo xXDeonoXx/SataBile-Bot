@@ -7,7 +7,7 @@ client.on('ready', () => {
 });
 
 
-
+const bileDictionary = require('./bileDictionary');
 
 client.on('message', msg => {
 
@@ -32,7 +32,8 @@ console.log("\ncommand: " + command);
 
     switch(command){
         case 'bile':
-            msg.reply('vai tomar no cu');
+            console.log(bileDictionary.getFraseAleatoria());
+            msg.reply(bileDictionary.getFraseAleatoria());
         break
 
         case 'zap':
