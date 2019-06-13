@@ -10,6 +10,11 @@ client.on('ready', () => {
 const bileDictionary = require('./bileDictionary');
 // Importando roll
 const roll = require('./roll');
+// Importando play
+const play = require('./play');
+// Criando queue
+const queue = new Array();
+queue.push('piruuu');
 
 client.on('message', msg => {
 
@@ -73,14 +78,16 @@ console.log("\ncommand: " + command);
         
         case 'play':
             var voiceChannel = msg.member.voiceChannel;
-
-            const ytdl = require('ytdl-core');
-            const streamOptions = { seek: 0, volume: 1 };
-            voiceChannel.join().then(connection =>{
-                const stream = ytdl(args[0], { filter : 'audioonly' });                
-                const dispatcher = connection.playStream(stream, streamOptions);
-                dispatcher.on("end", end => {voiceChannel.leave()});
-            }).catch(err => console.log(err));
+            play(voiceChannel, args[0]);
+            // const ytdl = require('ytdl-core');
+            // const streamOptions = { seek: 0, volume: 1 };
+            // voiceChannel.join().then(connection =>{
+            //     const stream = ytdl(args[0], { filter : 'audioonly' });                
+            //     const dispatcher = connection.playStream(stream, streamOptions);
+            //     dispatcher.on("end", end => {
+            //         voiceChannel.leave();
+            //     });
+            // }).catch(err => console.log(err));
         break;
     }
 
