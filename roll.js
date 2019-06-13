@@ -18,7 +18,20 @@ module.exports.roll = function(args) {
             results.push(Math.floor(Math.random() * dice + 1));
         }
 
-        return results;        
+            //soma total das rolagens
+            var sum = 0;
+            for(var i = 0; i < results.length; i++){
+                sum += results[i];
+            }
+        
+            //montando String para mensagem com as rolagens
+            var s = "";
+            for(var i = 0; i < results.length; i++){
+                s += results[i] + ", ";
+            }
+            s += "= " + sum;
+
+        return s;        
     } catch (error) {
         console.log("formato de roll incorreto: " + error);
     }
