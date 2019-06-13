@@ -8,6 +8,8 @@ client.on('ready', () => {
 
 
 const bileDictionary = require('./bileDictionary');
+// Importando roll
+const roll = require('./roll');
 
 client.on('message', msg => {
 
@@ -32,17 +34,21 @@ console.log("\ncommand: " + command);
 
     switch(command){
         case 'bile':
-            console.log(bileDictionary.getFraseAleatoria());
             msg.reply(bileDictionary.getFraseAleatoria());
+        break
+
+        case 'roll':
+            console.log(roll.roll(args));
+            msg.reply(roll.roll(args));
         break
 
         case 'zap':
             msg.reply('Pera, to mandando um zap');
         break
 
-        case 'roll':
-            msg.reply('Vai jogar rpg no inferno, o bot ainda não ta pronto.');
-        break
+        // case 'roll':
+        //     msg.reply('Vai jogar rpg no inferno, o bot ainda não ta pronto.');
+        // break
 
         case 'rombo':
             msg.reply('You have been blessed by the god Rombotron. May honey drip from your holy johnson, and may succubus be attracted to you.');
