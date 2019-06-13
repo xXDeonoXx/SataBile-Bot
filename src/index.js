@@ -1,3 +1,4 @@
+// aqui é o início do programa
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const auth = require('./auth.json');
@@ -9,9 +10,9 @@ client.on('ready', () => {
 
 const bileDictionary = require('./bileDictionary');
 // Importando roll
-const roll = require('./roll');
+const roll = require('./comandos/roll');
 // Importando play
-const play = require('./play');
+const play = require('./comandos/play');
 // Criando queue
 const queue = new Array();
 queue.push('piruuu');
