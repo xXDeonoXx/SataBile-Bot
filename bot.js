@@ -43,16 +43,16 @@ console.log("\ncommand: " + command);
         break
 
         case 'roll':            
+            //valores das rolagens
             var values = roll.roll(args);
-            console.log(values);
+
+            //soma total das rolagens
             var sum = 0;
             for(var i = 0; i < values.length; i++){
                 sum += values[i];
-                console.log("i = " + i + "\n sum = " + sum);
-                console.log(args.length);
             }
-            console.log(sum);
 
+            //montando String para mensagem com as rolagens
             var s = "";
             for(var i = 0; i < values.length; i++){
                 s += values[i] + ", ";
