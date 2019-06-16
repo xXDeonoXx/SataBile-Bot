@@ -1,37 +1,46 @@
 // Importando ytdl
 const ytdl = require('ytdl-core');
 
-// Criando queue
-let queue = new Array();
-// Flag para sabermos se já estamos no voice channel
-let inVoiceChannel = false;
-// Opcoes de reproducao
-const streamOptions = { seek: 0, volume: 1 };
+const commandPlay = async (connection, voiceChannel, link, msg, queue) => {
+	connection = await connect();
 
-module.exports = async function (voiceChannel, link) {
-	if (!inVoiceChannel) {
-		const connection = await voiceChannel.join();
-		inVoiceChannel = true;
+	if (queue > 0) {
 		queue.push(link);
-		this.playSong(connection);
 	} else {
 		queue.push(link);
+		await play();
+	}
+
+	// conecta no canal de voz do usuário
+	async function connect() {
+		if (voiceChannel === undefined) {
+			msg.reply(
+				'Ae mano na moralzinha, entra num canal de voz ai fazeno o favo.'
+			);
+		}
+
+		return connection ? connection : await voiceChannel.join();
+	}
+
+	async function play() {
+		const stream = ytdl(queue[0], { filter: 'audioonly' });
+		const streamOptions = { seek: 0, volume: 1 };
+		const dispatcher = connection.playStream(stream, streamOptions);
+		msg.reply('music queue: ', queue);
+		dispatcher.on('end', () => {
+			queue.shift();
+			if (queue.length > 0) {
+				play();
+			} else {
+				msg.reply(
+					'Ae menó, acabo o som aqui, vou la na casa da sua mãe pegar o resto'
+				);
+				if(voiceChannel){
+					voiceChannel.leave();
+				}
+			}
+		});
 	}
 };
 
-playSong = (connection) => {
-	// Criando stream
-	const stream = ytdl(queue[0], { filter: 'audioonly' });
-	const dispatcher = connection.playStream(stream, streamOptions);
-
-	dispatcher.on('end', () => {
-		// Removendo musica da fila
-		queue.shift();
-		// Verificando se temos mais musicas na fila
-		if (queue.length > 0) {
-			playSong(connection, queue[0]);
-		} else {
-			console.log('Não tem mais musica', queue);
-		}
-	});
-};
+module.exports = commandPlay;
