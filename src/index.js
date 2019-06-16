@@ -38,7 +38,10 @@ client.on('message', msg => {
 	const command = args.shift().toLowerCase();
 	console.log('args: ' + args);
 	console.log('\ncommand: ' + command);
-	const voiceChannel = msg.member.voiceChannel;
+
+	// para caso o usuário mande uma mensagem direto ao satanas
+	const voiceChannel = msg.member ? msg.member.voiceChannel : null;
+
 	switch (command) {
 	//retorna uma citação maravilhosa de nosso deus bile aleatóriamente
 	case 'bile':
