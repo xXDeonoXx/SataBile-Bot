@@ -12,9 +12,10 @@ const bileDictionary = require('./bileDictionary');
 const roll = require('./comandos/roll');
 // Importando play
 const play = require('./comandos/play');
-// Criando queue
+// Criando queue de músicas
 const queue = new Array();
-queue.push('piruuu');
+
+let connection;
 
 client.on('message', msg => {
 	// It's good practice to ignore other bots. This also makes your bot ignore itself
@@ -24,8 +25,6 @@ client.on('message', msg => {
 	// Also good practice to ignore any message that does not start with our prefix,
 	// which is set in the configuration file.
 	if (msg.content.indexOf('+') !== 0) return;
-
-	
 
 	// Here we separate our "command" name, and our "arguments" for the command.
 	// e.g. if we have the message "+say Is this the real life?" , we'll get the following:
@@ -74,12 +73,24 @@ client.on('message', msg => {
 		break;
 
 	case 'play':
-		if(voiceChannel === undefined) {
-			msg.reply('Ae mano na moralzinha, entra num canal de voz ai fazeno o favo.');
+		if (!voiceChannel) {
+			msg.reply('Vai lá ouvir a musica no vocêTubo');
 			break;
 		}
-		play(voiceChannel, args[0]);
+		play(connection, voiceChannel, args[0], msg, queue);
 		break;
+
+	case 'leave':
+		if (!voiceChannel) {
+			msg.reply('Tu que tem que sair seu imbecil');
+			break;
+		}
+		msg.reply('porra ta me expulsando é isso mesmo?');
+		voiceChannel.leave();
+		break;
+
+	default:
+		msg.reply('pra falar comigo tem que falar que nem gente');
 	}
 });
 
