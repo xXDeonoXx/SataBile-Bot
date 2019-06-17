@@ -75,6 +75,7 @@ exitVoiceChannel = async () => {
  * @param {string} serverId
  * @param {string} link
  * @author Lucas Sousa, Rômullo Cordeiro
+ * @since 2019.06.17
  * @description
  * Método para manter um objeto que será utilizado para
  * gerenciar diferentes filas em diferentes servidores.
