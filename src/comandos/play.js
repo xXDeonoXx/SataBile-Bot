@@ -4,12 +4,8 @@ const ytdl = require('ytdl-core');
 // Criando queue
 let queue = new Array();
 
-var serverManager = new Array();
-
-var server = {
-	id: null,
-	queue: new Array()
-}
+// Criando o server manager
+const serverManager = [];
 
 
 
@@ -17,7 +13,7 @@ var server = {
 let inVoiceChannel = false;
 
 // Opcoes de reproducao
-const streamOptions = { seek: 0, volume: 1 };
+const streamOptions = { seek: 0, volume: 0 };
 
 //Connection precisa ja existir pois sera usada em outras funções de play
 let connection = null;
@@ -77,8 +73,25 @@ exitVoiceChannel = async () => {
 
 //a função abaixo adiciona o id do servidor e o link a queue de um objeto server, que depois
 //é adicionado a um array serverManager
-updateServerManager = async(serverId, link) =>{
-	//teste
+updateServerManager = async (serverId, link) => {
+	// Verificando se já temos uma fila neste server
+	if (serverManager[serverId]) {
+		console.log('Já temos uma fila aqui');
+	} else {
+		console.log('Não temos uma fila');
+		// Não temos uma fila, devemos cria-la
+		serverManager[serverId] = {
+			queue: new Array()
+		}
+	}
+
+	// Adicionando musica na queue.
+	serverManager[serverId].queue.push(link);
+	
+	console.log(serverManager);
+	return;
+	console.log('server', serverManager);
+
 	if(serverManager.find(x => x.id == serverId) != undefined){
 		console.log("membro ja existe, adicionando musica...");		
 
