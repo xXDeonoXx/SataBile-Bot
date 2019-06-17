@@ -18,7 +18,7 @@ const queue = new Array();
 queue.push('piruuu');
 
 client.on('message', msg => {
-
+	
 
 	// It's good practice to ignore other bots. This also makes your bot ignore itself
 	// and not get into a spam loop (we call that "botception").
@@ -67,7 +67,7 @@ client.on('message', msg => {
 		break;
         
 	case 'play':
-		var voiceChannel = msg.member.voiceChannel;
+		var voiceChannel = msg;
 		play(voiceChannel, args[0]);
 		// const ytdl = require('ytdl-core');
 		// const streamOptions = { seek: 0, volume: 1 };
