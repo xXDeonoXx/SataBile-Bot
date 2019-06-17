@@ -71,8 +71,14 @@ exitVoiceChannel = async () => {
 }
 
 
-//a função abaixo adiciona o id do servidor e o link a queue de um objeto server, que depois
-//é adicionado a um array serverManager
+/**
+ * @param {string} serverId
+ * @param {string} link
+ * @author Lucas Sousa, Rômullo Cordeiro
+ * @description
+ * Método para manter um objeto que será utilizado para
+ * gerenciar diferentes filas em diferentes servidores.
+ */
 updateServerManager = async (serverId, link) => {
 	// Verificando se já temos uma fila neste server
 	if (serverManager[serverId]) {
@@ -87,34 +93,4 @@ updateServerManager = async (serverId, link) => {
 
 	// Adicionando musica na queue.
 	serverManager[serverId].queue.push(link);
-	
-	console.log(serverManager);
-	return;
-	console.log('server', serverManager);
-
-	if(serverManager.find(x => x.id == serverId) != undefined){
-		console.log("membro ja existe, adicionando musica...");		
-
-		let index = null;
-		serverManager.map((server, index) => {
-			if (server.id === serverId) {
-			  index = index;
-		  }
-		});
-
-		console.log("index = " + index);
-		serverManager[index].queue.push(link);
-
-	}
-	else{
-		console.log("membro não existe, criando e adicionando musica...");
-		let serverX = server;
-		serverX.id = serverId;
-		serverX.queue.push(link);
-		serverManager.push(serverX);
-		serverX = null;	
-
-		let index = serverManager.findIndex(x => x.id === serverId);
-		console.log(serverManager[index]);			
-	}	
 }
