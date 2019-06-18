@@ -7,37 +7,39 @@ let queue = new Array();
 // Criando o server manager
 const serverManager = [];
 
-
-
 // Flag para sabermos se já estamos no voice channel
-let inVoiceChannel = false;
+let inVoiceChannel = [];
 
 // Opcoes de reproducao
-const streamOptions = { seek: 0, volume: 0 };
+const streamOptions = { seek: 0, volume: 0.5 };
 
 //Connection precisa ja existir pois sera usada em outras funções de play
-let connection = null;
+let connection = [];
 
 //Delay usado para await
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 module.exports = async function (msg, link) {
-	if (!inVoiceChannel) {
-		connection = await msg.member.voiceChannel.join();
-		inVoiceChannel = true;
-		queue.push(link);
-		updateServerManager(msg.member.guild.id, link);
 
-		this.playSong(connection);
+	let serverId = msg.member.guild.id;
+
+	if(inVoiceChannel[serverId] === null){
+		inVoiceChannel[serverId] = false;
+	}
+
+	if (!inVoiceChannel[serverId]) {		
+		inVoiceChannel[serverId] = true;
+		connection[serverId] = await msg.member.voiceChannel.join();
+		updateServerManager(serverId, link);
+		this.playSong(connection[serverId], serverId);
 	} else {
-		queue.push(link);
-		updateServerManager(msg.member.guild.id, link);
+		updateServerManager(serverId, link);
 	}
 };
 
-playSong = (connection) => {
+playSong = (connection, serverId) => {
 	// Criando stream
-	const stream = ytdl(queue[0], {
+	const stream = ytdl(serverManager[serverId].queue[0], {
 		 filter: 'audioonly', 
 		 // abaixo muda o cache para 10Mb, evita fim prematuro da musica
 		 highWaterMark: 1024 * 1024 * 10 
@@ -46,13 +48,13 @@ playSong = (connection) => {
 
 	dispatcher.on('end', () => {
 		// Removendo musica da fila
-		queue.shift();
+		serverManager[serverId].queue.shift();
 		// Verificando se temos mais musicas na fila
-		if (queue.length > 0) {
-			playSong(connection, queue[0]);
+		if (serverManager[serverId].queue.length > 0) {
+			playSong(connection, serverId);
 		} else {
-			console.log('Não tem mais musica', queue);
-			exitVoiceChannel();
+			console.log('Não tem mais musica', serverManager[serverId].queue);
+			exitVoiceChannel(serverId);
 		}
 	});
 };
@@ -64,9 +66,9 @@ module.exports.stopSong = function(){
 	exitVoiceChannel();
 }
 
-exitVoiceChannel = async () => {
+exitVoiceChannel = async (serverId) => {
 	await delay(1000);
-	connection.disconnect();
+	connection[serverId].disconnect();
 	inVoiceChannel = false;
 }
 
