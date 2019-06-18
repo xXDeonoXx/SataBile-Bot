@@ -28,15 +28,14 @@ let connection = [];
 //Delay usado para await
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-module.exports = async function (msg, link) {
-
+module.exports = async function(msg, link) {
 	let serverId = msg.member.guild.id;
 
-	if(inVoiceChannel[serverId] === null){
+	if (inVoiceChannel[serverId] === null) {
 		inVoiceChannel[serverId] = false;
 	}
 
-	if (!inVoiceChannel[serverId]) {		
+	if (!inVoiceChannel[serverId]) {
 		inVoiceChannel[serverId] = true;
 		connection[serverId] = await msg.member.voiceChannel.join();
 		updateServerManager(serverId, link);
@@ -49,10 +48,10 @@ module.exports = async function (msg, link) {
 playSong = (connection, serverId) => {
 	// Criando stream
 	const stream = ytdl(serverManager[serverId].queue[0], {
-		 filter: 'audioonly', 
-		 // abaixo muda o cache para 10Mb, evita fim prematuro da musica
-		 highWaterMark: 1024 * 1024 * 1
-		});
+		filter: 'audioonly',
+		// abaixo muda o cache para 10Mb, evita fim prematuro da musica
+		highWaterMark: 1024 * 1024 * 1
+	});
 	const dispatcher = connection.playStream(stream, streamOptions);
 
 	dispatcher.on('end', () => {
@@ -68,21 +67,19 @@ playSong = (connection, serverId) => {
 	});
 };
 
-module.exports.stopSong = function(msg){
+module.exports.stopSong = function(msg) {
 	ytdl.stopSong;
 	stream = null;
 	dispatcher = null;
 	exitVoiceChannel();
-}
-
+};
 
 //função para sair do canal de voz com um pequeno delay
-exitVoiceChannel = async (serverId) => {
+exitVoiceChannel = async serverId => {
 	await delay(1000);
 	connection[serverId].disconnect();
 	inVoiceChannel = false;
-}
-
+};
 
 /**
  * @param {string} serverId
@@ -102,9 +99,9 @@ updateServerManager = async (serverId, link) => {
 		// Não temos uma fila, devemos cria-la
 		serverManager[serverId] = {
 			queue: new Array()
-		}
+		};
 	}
 
 	// Adicionando musica na queue.
 	serverManager[serverId].queue.push(link);
-}
+};
