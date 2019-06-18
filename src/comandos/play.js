@@ -1,8 +1,17 @@
+/*
+	Esse script é responsavel pela gerencia das musicas sendo tocadas EM TODOS SERVIDORES,
+	todos os objetos que são array são usados para gerir isso, os indices são gerados
+	com o id do server e cada indice possui os atributos de seus respectivos servidores
+
+	ex: serverManager[123123] contem a queue de musicas do servidor 123123
+		inVoiceChannel[123123] é a flag para saber se o bot está em algum canal no server 123123
+		connection[123123] é usado para tocar a musica no canal 123123
+
+		TODO: resta fazer o stop song
+*/
+
 // Importando ytdl
 const ytdl = require('ytdl-core');
-
-// Criando queue
-let queue = new Array();
 
 // Criando o server manager
 const serverManager = [];
@@ -42,7 +51,7 @@ playSong = (connection, serverId) => {
 	const stream = ytdl(serverManager[serverId].queue[0], {
 		 filter: 'audioonly', 
 		 // abaixo muda o cache para 10Mb, evita fim prematuro da musica
-		 highWaterMark: 1024 * 1024 * 10 
+		 highWaterMark: 1024 * 1024 * 1
 		});
 	const dispatcher = connection.playStream(stream, streamOptions);
 
@@ -59,13 +68,15 @@ playSong = (connection, serverId) => {
 	});
 };
 
-module.exports.stopSong = function(){
+module.exports.stopSong = function(msg){
 	ytdl.stopSong;
 	stream = null;
 	dispatcher = null;
 	exitVoiceChannel();
 }
 
+
+//função para sair do canal de voz com um pequeno delay
 exitVoiceChannel = async (serverId) => {
 	await delay(1000);
 	connection[serverId].disconnect();

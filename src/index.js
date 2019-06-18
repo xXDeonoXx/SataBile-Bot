@@ -67,8 +67,7 @@ client.on('message', msg => {
 		break;
         
 	case 'play':
-		var voiceChannel = msg;
-		play(voiceChannel, args[0]);
+		play(msg, args[0]);
 		// const ytdl = require('ytdl-core');
 		// const streamOptions = { seek: 0, volume: 1 };
 		// voiceChannel.join().then(connection =>{
@@ -81,7 +80,7 @@ client.on('message', msg => {
 		break;
 	
 	case 'stop':
-		play.stopSong();
+		play.stopSong(msg);
 		break;
 	}
 
