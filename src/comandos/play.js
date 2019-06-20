@@ -6,15 +6,13 @@
 	ex: serverManager[123123] contem a queue de musicas do servidor 123123
 		inVoiceChannel[123123] é a flag para saber se o bot está em algum canal no server 123123
 		connection[123123] é usado para tocar a musica no canal 123123
-
-		TODO: resta fazer o stop song
 */
 
-// Importando ytdl
+// Importando ytdl, usado para obter as streams de som do youtube
 const ytdl = require('ytdl-core');
 
-// Criando o server manager
-const serverManager = [];
+// Usado para guardar as "queues" de todos o servidores, cada um possui sua playlist individual
+const serverQueueManager = [];
 
 // Flag para sabermos se já estamos no voice channel
 let inVoiceChannel = [];
@@ -22,13 +20,17 @@ let inVoiceChannel = [];
 // Opcoes de reproducao
 const streamOptions = { seek: 0, volume: 0.5 };
 
-//Connection precisa ja existir pois sera usada em outras funções de play
+//Connection é a conexão do bot no canal de voz, é usado para tocar stream de musicas ou para-las
 let connection = [];
 
 //Delay usado para await
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 module.exports = async function(msg, link) {
+	if(msg.member.voiceChannel == null){
+		msg.reply("Tu tem que ta num canal de voz pra ouvir musica seu corno fodido");
+		return;
+	}
 	let serverId = msg.member.guild.id;
 
 	if (inVoiceChannel[serverId] === null) {
@@ -39,50 +41,49 @@ module.exports = async function(msg, link) {
 		inVoiceChannel[serverId] = true;
 		connection[serverId] = await msg.member.voiceChannel.join();
 		updateServerManager(serverId, link);
-		this.playSong(connection[serverId], serverId);
+		this.playSong(serverId);
 	} else {
 		updateServerManager(serverId, link);
 	}
 };
 
-playSong = (connection, serverId) => {
+playSong = (serverId) => {
 	// Criando stream
-	const stream = ytdl(serverManager[serverId].queue[0], {
+	const stream = ytdl(serverQueueManager[serverId].queue[0], {
 		filter: 'audioonly',
 		// abaixo muda o cache para 10Mb, evita fim prematuro da musica
 		highWaterMark: 1024 * 1024 * 1
 	});
-	const dispatcher = connection.playStream(stream, streamOptions);
+	
+	const dispatcher = connection[serverId].playStream(stream, streamOptions);
 
 	dispatcher.on('end', () => {
-		// Removendo musica da fila
-		serverManager[serverId].queue.shift();
-		// Verificando se temos mais musicas na fila
-		if (serverManager[serverId].queue.length > 0) {
-			playSong(connection, serverId);
-		} else {
-			console.log('Não tem mais musica', serverManager[serverId].queue);
-			exitVoiceChannel(serverId);
-		}
+		playNextSong(serverId);
 	});
 };
 
-module.exports.stopSong = function(msg) {
-	ytdl.stopSong;
-	stream = null;
-	dispatcher = null;
-	exitVoiceChannel();
-};
 
-//função para sair do canal de voz com um pequeno delay
+
+
+/**
+ * @param {snowflake} serverId
+ * @author Rômullo Cordeiro
+ * @since 2019.06.17
+ * @description
+ * função para sair do canal de voz com um pequeno delay
+ */
 exitVoiceChannel = async serverId => {
 	await delay(1000);
 	connection[serverId].disconnect();
-	inVoiceChannel = false;
+	inVoiceChannel[serverId] = false;
+	serverQueueManager[serverId] = null;
 };
 
+
+
+
 /**
- * @param {string} serverId
+ * @param {snowflake} serverId
  * @param {string} link
  * @author Lucas Sousa, Rômullo Cordeiro
  * @since 2019.06.17
@@ -92,16 +93,103 @@ exitVoiceChannel = async serverId => {
  */
 updateServerManager = async (serverId, link) => {
 	// Verificando se já temos uma fila neste server
-	if (serverManager[serverId]) {
+	if (serverQueueManager[serverId]) {
 		console.log('Já temos uma fila aqui');
 	} else {
 		console.log('Não temos uma fila');
 		// Não temos uma fila, devemos cria-la
-		serverManager[serverId] = {
+		serverQueueManager[serverId] = {
 			queue: new Array()
 		};
 	}
 
 	// Adicionando musica na queue.
-	serverManager[serverId].queue.push(link);
+	serverQueueManager[serverId].queue.push(link);
 };
+
+
+
+
+
+/**
+ * @param {snowflake} serverId
+ * @author Rômullo Cordeiro
+ * @since 2019.06.20
+ * @description
+ * altera a queue e toca a proxima musica da lista
+ */
+playNextSong = (serverId) => {
+		// a checagem abaixo ocorre pois connection[serverId] é setado
+		// como null ao desconectar do canal de voz, isso causava uma excessção,
+		// então agora ele só executa o bloco abaixo com connection sendo utilizado e existindo
+		if(connection[serverId] != null){
+
+			// Retirando musica da fila
+			serverQueueManager[serverId].queue.shift();
+			
+			// Verificando se temos mais musicas na fila
+			if (serverQueueManager[serverId].queue.length > 0) {
+				playSong(serverId);
+			} else {
+				console.log('Não tem mais musica', serverQueueManager[serverId].queue);
+				exitVoiceChannel(serverId);
+			}
+		}
+}
+
+
+//funções abaixas são as chamadas foras desse script
+
+/**
+ * @param {snowflake} serverId
+ * @author Rômullo Cordeiro
+ * @since 2019.06.17
+ * @description
+ * usada para chamar do index caso queira parar o player
+ */
+module.exports.stopSong = function(serverId) {
+	exitVoiceChannel(serverId);		
+};
+
+
+
+
+
+/**
+ * @param {snowflake} serverId
+ * @author Rômullo Cordeiro
+ * @since 2019.06.20
+ * @description
+ * termina a musica tocando atualmente fazendo com que a proxima seja tocada
+ */
+module.exports.skipSong = function (serverId) {
+	connection[serverId].dispatcher.end();
+}
+
+
+
+
+/**
+ * @param {snowflake} serverId
+ * @author Rômullo Cordeiro
+ * @since 2019.06.20
+ * @description
+ * pausa a musica tocando atualmente
+ */
+module.exports.pauseSong = function (serverId) {
+	connection[serverId].dispatcher.pause();
+}
+
+
+
+
+/**
+ * @param {snowflake} serverId
+ * @author Rômullo Cordeiro
+ * @since 2019.06.20
+ * @description
+ * pausa a musica tocando atualmente
+ */
+module.exports.resumeSong = function (serverId) {
+	connection[serverId].dispatcher.resume();
+}
