@@ -13,12 +13,10 @@ const bileDictionary = require('./bileDictionary');
 const roll = require('./comandos/roll');
 // Importando play
 const play = require('./comandos/play');
-// Criando queue
-const queue = new Array();
-queue.push('piruuu');
+
 
 client.on('message', msg => {
-
+	
 
 	// It's good practice to ignore other bots. This also makes your bot ignore itself
 	// and not get into a spam loop (we call that "botception").
@@ -38,51 +36,63 @@ client.on('message', msg => {
 	console.log('args: ' + args);
 	console.log('\ncommand: ' + command);
 
-	switch(command){
+
+	//try catch para evitar que o bot crashe
+	try {
+		switch(command){
         
-	//retorna uma citação maravilhosa de nosso deus bile aleatóriamente
-	case 'bile':
-		msg.reply(bileDictionary.getFraseAleatoria());
-		break;
-
-		//rola dados
-	case 'roll':            
-		msg.channel.send(msg.author + ' rolou: ' + roll.roll(args));
-		break;
-
-	case 'zap':
-		msg.reply('Pera, to mandando um zap');
-		break;
-
-	case 'rombo':
-		msg.reply('You have been blessed by the god Rombotron. May honey drip from your holy johnson, and may succubus be attracted to you.');
-		break;
-
-	case 'minas':
-		msg.reply('Gabirujo just rolled in his grave, anger is bringing him back from the dead.');
-		break;
-
-	case 'golira':
-		msg.reply('Bile is being summoned.');
-		break;
-        
-	case 'play':
-		var voiceChannel = msg.member.voiceChannel;
-		play(voiceChannel, args[0]);
-		// const ytdl = require('ytdl-core');
-		// const streamOptions = { seek: 0, volume: 1 };
-		// voiceChannel.join().then(connection =>{
-		//     const stream = ytdl(args[0], { filter : 'audioonly' });                
-		//     const dispatcher = connection.playStream(stream, streamOptions);
-		//     dispatcher.on("end", end => {
-		//         voiceChannel.leave();
-		//     });
-		// }).catch(err => console.log(err));
-		break;
+			//retorna uma citação maravilhosa de nosso deus bile aleatóriamente
+			case 'bile':
+				msg.reply(bileDictionary.getFraseAleatoria());
+				break;
 	
-	case 'stop':
-		play.stopSong();
-		break;
+				//rola dados
+			case 'roll':            
+				msg.channel.send(msg.author + ' rolou: ' + roll.roll(args));
+				break;
+	
+			case 'zap':
+				msg.reply('Pera, to mandando um zap');
+				break;
+	
+			case 'rombo':
+				msg.reply('You have been blessed by the god Rombotron. May honey drip from your holy johnson, and may succubus be attracted to you.');
+				break;
+	
+			case 'minas':
+				msg.reply('Gabirujo just rolled in his grave, anger is bringing him back from the dead.');
+				break;
+	
+			case 'golira':
+				msg.reply('Bile is being summoned.');
+				break;
+				
+			//comandos do player de musica abaixo
+			case 'play':
+					play(msg, args[0]);					
+				break;
+			
+			case 'stop':
+				play.stopSong(msg.member.guild.id);
+				msg.reply("Vai tomar no cu também, não toco mais nada pra tu.");
+				break;
+	
+			case 'skip':
+				play.skipSong(msg.member.guild.id);
+			break;
+
+			case 'pause':
+				play.pauseSong(msg.member.guild.id);
+				msg.reply("Tá cara, eu pauso essa porra");
+			break;
+			
+			case 'resume':
+				play.resumeSong(msg.member.guild.id);
+				msg.reply("Agora quer ouvir ? parece couro de pica porra");
+			break;			
+		}		
+	} catch (error) {
+		
 	}
 
 });
