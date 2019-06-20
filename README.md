@@ -30,5 +30,5 @@ Exemplo de resultado: `Vai tomar no cu`
 - [x] O bot deverá ser capaz de falar coisas aleatórias (+bile)
 - [x] O bot deverá ser capaz de rolar dados (+roll)
 - [ ] O bot deverá ser capaz de retornar uma fala aleatória de um campeão (+zed, +thresh)
-- [ ] Devemos implementar a possibilidade de enfileirar musicas com o +play
+- [x] Devemos implementar a possibilidade de enfileirar musicas com o +play
 - [ ] O Bot deve pesquisar e tocar um video apenas pelo nome
