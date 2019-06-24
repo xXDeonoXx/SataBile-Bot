@@ -8,6 +8,21 @@
 		connection[123123] é usado para tocar a musica no canal 123123
 */
 
+// Key da api do youtube para usar com o youtube-api-v3
+const $YOUTUBE_API_KEY = 'AIzaSyAIQNaWE2afFRiFBQTPBOLFmnRUZUyK_Pg';
+
+// Importando o youtube api, usado para pesquisar por videos
+const searchYoutube = require('youtube-api-v3-search');
+
+// Opções da busca
+const options = {
+	q:'ASSUNTO A SE PESQUISAR',
+	part:'snippet', // array com title, description, thumbnails, channel title e etc
+	type:'video' // tipo de conteudo a ser buscado
+  }
+
+
+
 // Importando ytdl, usado para obter as streams de som do youtube
 const ytdl = require('ytdl-core');
 
@@ -40,11 +55,16 @@ module.exports = async function(msg, link) {
 	if (!inVoiceChannel[serverId]) {
 		inVoiceChannel[serverId] = true;
 		connection[serverId] = await msg.member.voiceChannel.join();
-		updateServerManager(serverId, link);
-		this.playSong(serverId);
+		if(ytdl.validateURL(link)){
+			updateServerManager(serverId, link);
+			this.playSong(serverId);
+		}else{
+			//searchVideoAndPlay(serverId, link);
+		}
 	} else {
 		updateServerManager(serverId, link);
 	}
+
 };
 
 playSong = (serverId) => {
@@ -192,4 +212,24 @@ module.exports.pauseSong = function (serverId) {
  */
 module.exports.resumeSong = function (serverId) {
 	connection[serverId].dispatcher.resume();
+}
+
+
+
+
+/**
+ * @author Rômullo Cordeiro
+ * @since 2019.06.24
+ * @description
+ * pesquisa por um video e retorna as informações necessarias
+ *
+ * referencia de um JSON resultado de uma pesquisa:
+ * https://developers.google.com/youtube/v3/docs/search?hl=pt-br#resource
+ */
+
+searchVideoAndPlay = async (serverId, searchString) => {
+	options.q = searchString;
+	let result = await searchYoutube($YOUTUBE_API_KEY,options);
+	let url = 'https://www.youtube.com/watch?v=' + result.items[0].id;
+	let title = result.items[0].title;
 }
