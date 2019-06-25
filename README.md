@@ -57,5 +57,5 @@ de voz e toque musicas para você, o bot consegue guardar varios links em uma pl
 - [x] O Bot deverá ser capaz de rolar dados (+roll)
 - [ ] O Bot deverá ser capaz de retornar uma fala aleatória de um campeão (+zed, +thresh)
 - [x] Devemos implementar a possibilidade de enfileirar musicas com o +play
-- [ ] O Bot deve pesquisar e tocar um video apenas pelo nome
+- [x] O Bot deve pesquisar e tocar um video apenas pelo nome
 - [ ] O Bot devera ser capaz de enviar uma imagem de acordo com o assunto escolhido
