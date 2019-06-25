@@ -15,28 +15,33 @@ const $YOUTUBE_API_KEY = 'AIzaSyAIQNaWE2afFRiFBQTPBOLFmnRUZUyK_Pg';
 const searchYoutube = require('youtube-api-v3-search');
 
 // Opções da busca
+//referencia para opções de filtro https://developers.google.com/youtube/v3/docs/search/list
 const options = {
 	q:'ASSUNTO A SE PESQUISAR',
-	part:'snippet', // array com title, description, thumbnails, channel title e etc
-	type:'video' // tipo de conteudo a ser buscado
-  }
-
-
+	part:'snippet',
+	type:'video',
+	maxResults: 10,
+	order: 'relevance',
+	safeSearch: 'none',
+	topicId: '/m/04rlf'
+}
 
 // Importando ytdl, usado para obter as streams de som do youtube
 const ytdl = require('ytdl-core');
 
 // Usado para guardar as "queues" de todos o servidores, cada um possui sua playlist individual
-const serverQueueManager = [];
+const serverManager = [];
 
-// Flag para sabermos se já estamos no voice channel
-let inVoiceChannel = [];
+let info = {
+	queue: new Array(),
+	inVoiceChannel: false,
+	connection: null,
+	title: ''
+}
 
 // Opcoes de reproducao
 const streamOptions = { seek: 0, volume: 0.5 };
 
-//Connection é a conexão do bot no canal de voz, é usado para tocar stream de musicas ou para-las
-let connection = [];
 
 //Delay usado para await
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -48,37 +53,46 @@ module.exports = async function(msg, link) {
 	}
 	let serverId = msg.member.guild.id;
 
-	if (inVoiceChannel[serverId] === null) {
-		inVoiceChannel[serverId] = false;
+	// Caso não existam informações para esse servidor, se cria um registro
+	if(serverManager[serverId] === undefined){
+		serverManager[serverId] = info;
 	}
 
-	if (!inVoiceChannel[serverId]) {
-		inVoiceChannel[serverId] = true;
-		connection[serverId] = await msg.member.voiceChannel.join();
-		if(ytdl.validateURL(link)){
-			updateServerManager(serverId, link);
-			this.playSong(serverId);
-		}else{
-			//searchVideoAndPlay(serverId, link);
-		}
-	} else {
-		updateServerManager(serverId, link);
+	if(ytdl.validateURL(link)){
+		
+		// O bloco abaixo pega as informações do video passado por link
+		ytdl.getInfo(link, async function(err, info) {
+			if (!serverManager[serverId].inVoiceChannel) {
+				serverManager[serverId].inVoiceChannel = true;
+				serverManager[serverId].connection = await msg.member.voiceChannel.join();	
+				updateServerManager(serverId, link, info.title);
+				this.playSong(serverId, msg);	
+			} else {		
+				updateServerManager(serverId, link, info.title);
+			}
+		});
+
+	}else{
+		console.log("A query é: " + msg.content.slice(6));
+		searchVideoInfoAndPlay(msg, msg.content.slice(6), foundVideoInfo);
 	}
+
 
 };
 
-playSong = (serverId) => {
+playSong = (serverId, msg) => {
 	// Criando stream
-	const stream = ytdl(serverQueueManager[serverId].queue[0], {
+	const stream = ytdl(serverManager[serverId].queue[0], {
 		filter: 'audioonly',
 		// abaixo muda o cache para 10Mb, evita fim prematuro da musica
 		highWaterMark: 1024 * 1024 * 1
 	});
 	
-	const dispatcher = connection[serverId].playStream(stream, streamOptions);
+	msg.channel.send("Tocando: '" + serverManager[serverId].title + "' agora.");
 
+	const dispatcher = serverManager[serverId].connection.playStream(stream, streamOptions);
 	dispatcher.on('end', () => {
-		playNextSong(serverId);
+		playNextSong(serverId, msg);
 	});
 };
 
@@ -94,9 +108,9 @@ playSong = (serverId) => {
  */
 exitVoiceChannel = async serverId => {
 	await delay(1000);
-	connection[serverId].disconnect();
-	inVoiceChannel[serverId] = false;
-	serverQueueManager[serverId] = null;
+	serverManager[serverId].connection.disconnect();
+	serverManager[serverId].inVoiceChannel = false;
+	serverManager[serverId].serverManager = null;
 };
 
 
@@ -111,20 +125,9 @@ exitVoiceChannel = async serverId => {
  * Método para manter um objeto que será utilizado para
  * gerenciar diferentes filas em diferentes servidores.
  */
-updateServerManager = async (serverId, link) => {
-	// Verificando se já temos uma fila neste server
-	if (serverQueueManager[serverId]) {
-		console.log('Já temos uma fila aqui');
-	} else {
-		console.log('Não temos uma fila');
-		// Não temos uma fila, devemos cria-la
-		serverQueueManager[serverId] = {
-			queue: new Array()
-		};
-	}
-
-	// Adicionando musica na queue.
-	serverQueueManager[serverId].queue.push(link);
+function updateServerManager (serverId, link, title) {
+	serverManager[serverId].queue.push(link);
+	serverManager[serverId].title = title;
 };
 
 
@@ -138,20 +141,20 @@ updateServerManager = async (serverId, link) => {
  * @description
  * altera a queue e toca a proxima musica da lista
  */
-playNextSong = (serverId) => {
+playNextSong = (serverId, msg) => {
 		// a checagem abaixo ocorre pois connection[serverId] é setado
 		// como null ao desconectar do canal de voz, isso causava uma excessção,
 		// então agora ele só executa o bloco abaixo com connection sendo utilizado e existindo
-		if(connection[serverId] != null){
+		if(serverManager[serverId].connection != null){
 
 			// Retirando musica da fila
-			serverQueueManager[serverId].queue.shift();
+			serverManager[serverId].queue.shift();
 			
 			// Verificando se temos mais musicas na fila
-			if (serverQueueManager[serverId].queue.length > 0) {
-				playSong(serverId);
+			if (serverManager[serverId].queue.length > 0) {
+				playSong(serverId, msg);
 			} else {
-				console.log('Não tem mais musica', serverQueueManager[serverId].queue);
+				console.log('Não tem mais musica', serverManager[serverId].queue);
 				exitVoiceChannel(serverId);
 			}
 		}
@@ -183,7 +186,7 @@ module.exports.stopSong = function(serverId) {
  * termina a musica tocando atualmente fazendo com que a proxima seja tocada
  */
 module.exports.skipSong = function (serverId) {
-	connection[serverId].dispatcher.end();
+	serverManager[serverId].connection.dispatcher.end();
 }
 
 
@@ -197,7 +200,7 @@ module.exports.skipSong = function (serverId) {
  * pausa a musica tocando atualmente
  */
 module.exports.pauseSong = function (serverId) {
-	connection[serverId].dispatcher.pause();
+	serverManager[serverId].connection.dispatcher.pause();
 }
 
 
@@ -211,7 +214,7 @@ module.exports.pauseSong = function (serverId) {
  * pausa a musica tocando atualmente
  */
 module.exports.resumeSong = function (serverId) {
-	connection[serverId].dispatcher.resume();
+	serverManager[serverId].connection.dispatcher.resume();
 }
 
 
@@ -224,12 +227,32 @@ module.exports.resumeSong = function (serverId) {
  * pesquisa por um video e retorna as informações necessarias
  *
  * referencia de um JSON resultado de uma pesquisa:
- * https://developers.google.com/youtube/v3/docs/search?hl=pt-br#resource
+ * https://developers.google.com/youtube/v3/docs/search/list?hl=pt-br - items (contem o resource)
+ * https://developers.google.com/youtube/v3/docs/search?hl=pt-br#resource - Resource (id do video fica aqui dentro)
  */
 
-searchVideoAndPlay = async (serverId, searchString) => {
+async function searchVideoInfoAndPlay (msg, searchString, callback) {
 	options.q = searchString;
 	let result = await searchYoutube($YOUTUBE_API_KEY,options);
-	let url = 'https://www.youtube.com/watch?v=' + result.items[0].id;
-	let title = result.items[0].title;
+
+	callback(msg, result);
+}
+
+
+async function foundVideoInfo(msg, result) {
+	let url = 'https://www.youtube.com/watch?v=' + result.items[0].id.videoId;
+	let title = result.items[0].snippet.title;
+	console.log("URL: " + url);
+	console.log('Titulo: ' + title);
+
+	let serverId = msg.member.guild.id;
+	updateServerManager(serverId, url, title);
+	if(!serverManager[serverId].inVoiceChannel){
+		serverManager[serverId].inVoiceChannel = true;
+		serverManager[serverId].connection = await msg.member.voiceChannel.join();
+		this.playSong(serverId);
+	}
+	msg.reply(" '" + title + "' Adicionado a playlist");
+
+
 }
