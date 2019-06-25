@@ -1,29 +1,34 @@
 /*
 	Esse script é responsavel pela gerencia das musicas sendo tocadas EM TODOS SERVIDORES,
-	todos os objetos que são array são usados para gerir isso, os indices são gerados
-	com o id do server e cada indice possui os atributos de seus respectivos servidores
-
-	ex: serverManager[123123] contem a queue de musicas do servidor 123123
-		inVoiceChannel[123123] é a flag para saber se o bot está em algum canal no server 123123
-		connection[123123] é usado para tocar a musica no canal 123123
+	serverManager possui todos os atributos usados pelos servidores no corpo de cada indice
+	cada indice é criado usando o serverId de cada servidor
 */
 
+
+
+// IMPORTANTE: existe um limite de quota diário com a qual a chave pode ser usada para fazer
+// resquisições à api do youtube, cada search gasta 100 quota, e o total diario é de 10000
+// por enquanto não descobri nenhum workaround para isso ou alguma alternativa, por enquanto
+// permanecerá desse jeito.
+
 // Key da api do youtube para usar com o youtube-api-v3
-const $YOUTUBE_API_KEY = 'AIzaSyAIQNaWE2afFRiFBQTPBOLFmnRUZUyK_Pg';
+const $YOUTUBE_API_KEY = 'AIzaSyDjxenShNZsyGxobC7NzGMKGGwB876eB_o';
 
 // Importando o youtube api, usado para pesquisar por videos
 const searchYoutube = require('youtube-api-v3-search');
 
+//TODO preciso diminuir o uso de quota pegando apenas o titulo e o id do video, links para
+//referencia: https://www.reddit.com/r/webdev/comments/aqou5b/youtube_api_v3_quota_issues/
+//https://developers.google.com/youtube/v3/docs/videos/list?hl=pt-br
+
 // Opções da busca
-//referencia para opções de filtro https://developers.google.com/youtube/v3/docs/search/list
+//referencia para opções de filtro https://developers.google.com/youtube/v3/docs/videos/list?hl=pt-br
 const options = {
 	q:'ASSUNTO A SE PESQUISAR',
 	part:'snippet',
-	type:'video',
-	maxResults: 10,
+	maxResults: 1,
 	order: 'relevance',
-	safeSearch: 'none',
-	topicId: '/m/04rlf'
+	safeSearch: 'none'
 }
 
 // Importando ytdl, usado para obter as streams de som do youtube
@@ -87,8 +92,6 @@ playSong = (serverId, msg) => {
 		// abaixo muda o cache para 10Mb, evita fim prematuro da musica
 		highWaterMark: 1024 * 1024 * 1
 	});
-	
-	msg.channel.send("Tocando: '" + serverManager[serverId].title + "' agora.");
 
 	const dispatcher = serverManager[serverId].connection.playStream(stream, streamOptions);
 	dispatcher.on('end', () => {
@@ -152,11 +155,15 @@ playNextSong = (serverId, msg) => {
 			
 			// Verificando se temos mais musicas na fila
 			if (serverManager[serverId].queue.length > 0) {
+				msg.channel.send("Tocando: '" + serverManager[serverId].title + "' agora.");
 				playSong(serverId, msg);
 			} else {
 				console.log('Não tem mais musica', serverManager[serverId].queue);
 				exitVoiceChannel(serverId);
+				msg.channel.send("Cabou as musicas filho da puta, posso mandar o zap agora ?");
 			}
+		}else{
+			console.log("deu merda menó");
 		}
 }
 
@@ -234,7 +241,7 @@ module.exports.resumeSong = function (serverId) {
 async function searchVideoInfoAndPlay (msg, searchString, callback) {
 	options.q = searchString;
 	let result = await searchYoutube($YOUTUBE_API_KEY,options);
-
+	
 	callback(msg, result);
 }
 
@@ -242,15 +249,12 @@ async function searchVideoInfoAndPlay (msg, searchString, callback) {
 async function foundVideoInfo(msg, result) {
 	let url = 'https://www.youtube.com/watch?v=' + result.items[0].id.videoId;
 	let title = result.items[0].snippet.title;
-	console.log("URL: " + url);
-	console.log('Titulo: ' + title);
-
 	let serverId = msg.member.guild.id;
 	updateServerManager(serverId, url, title);
 	if(!serverManager[serverId].inVoiceChannel){
 		serverManager[serverId].inVoiceChannel = true;
 		serverManager[serverId].connection = await msg.member.voiceChannel.join();
-		this.playSong(serverId);
+		this.playSong(serverId, msg);
 	}
 	msg.reply(" '" + title + "' Adicionado a playlist");
 
