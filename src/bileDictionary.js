@@ -10,11 +10,15 @@ const frasesDoBile = [
 	'Tem que falar agora ou posso pensar ?',
 	'Porra cara, Aline Barros não',
 	'Bora de crescente',
-	'Um travesti sem asas é como um anjo sem pênis',
+	'Uma travesti sem asas é como um anjo sem pênis',
 	'Aqui o bem não prevalece, sou blindado por Satan',
 	'Farquad, Far Farquad, Far Farquad on a quad, Far quad Farquads on quad quads',
 	'É hoje que eu esbagaço uma gorila',
-	'Sou o rei da floresta'
+	'Sou o rei da floresta',
+	'Não sei porra',
+	'Me deixa em paz',
+	'Se eu pensar eu vou ser uma metralhadora de coisas sabias',
+	'Dale deli doli'
 ];
 
 module.exports.getFraseAleatoria = function() {
