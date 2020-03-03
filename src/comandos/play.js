@@ -12,7 +12,7 @@
 // permanecerá desse jeito.
 
 // Key da api do youtube para usar com o youtube-api-v3
-const $YOUTUBE_API_KEY = 'AIzaSyDjxenShNZsyGxobC7NzGMKGGwB876eB_o';
+const $YOUTUBE_API_KEY = '';
 
 // Importando o youtube api, usado para pesquisar por videos
 const searchYoutube = require('youtube-api-v3-search');
